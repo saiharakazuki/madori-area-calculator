@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Madori Area Calculator</title>
+  <style>
+    :root {
+      --ink: #0b0b0c;
+      --muted: #6f6f72;
+      --bg: #f3f1ed;
+      --panel: rgba(255, 255, 255, .88);
+      --main: #0b0b0c;
+      --accent: #b79b62;
+      --accent-soft: #fff8e8;
+      --line: rgba(0, 0, 0, .14);
+      --radius: 4px;
+      --control-radius: 3px;
+      --shadow: 0 28px 80px rgba(0, 0, 0, .20);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      overflow-x: hidden;
+      background:
+        linear-gradient(112deg, transparent 0 18%, rgba(0, 0, 0, .055) 18.2%, transparent 18.8% 44%, rgba(0, 0, 0, .04) 44.2%, transparent 45%),
+        linear-gradient(27deg, transparent 0 35%, rgba(255, 255, 255, .86) 35.2%, transparent 36% 74%, rgba(0, 0, 0, .045) 74.2%, transparent 75%),
+        radial-gradient(circle at 12% 14%, rgba(255, 255, 255, .95), transparent 26%),
+        radial-gradient(circle at 86% 78%, rgba(0, 0, 0, .08), transparent 30%),
+        var(--bg);
+      background-size: 980px 980px, 820px 820px, 680px 680px, 760px 760px, auto;
+    }
+
+    body.theme-gold {
+      --ink: #11100c;
+      --muted: #776a4d;
+      --bg: #14100a;
+      --panel: rgba(255, 250, 236, .90);
+      --main: #14100a;
+      --accent: #d8aa45;
+      --accent-soft: #f8e2a7;
+      --line: rgba(216, 170, 69, .36);
+      --radius: 10px;
+      --control-radius: 8px;
+      --shadow: 0 30px 90px rgba(20, 16, 10, .32);
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255, 232, 166, .38), transparent 28%),
+        radial-gradient(circle at 88% 18%, rgba(216, 170, 69, .32), transparent 30%),
+        linear-gradient(135deg, #0f0b07 0%, #22170d 48%, #f2e6c6 100%);
+    }
+
+    body.theme-glass {
+      --ink: #171428;
+      --muted: #5e6070;
+      --bg: #e8dfd3;
+      --panel: rgba(255, 255, 255, .28);
+      --main: #6f4df5;
+      --accent: #63e8dd;
+      --accent-soft: rgba(255, 190, 214, .50);
+      --line: rgba(255, 255, 255, .58);
+      --radius: 34px;
+      --control-radius: 26px;
+      --shadow: 0 34px 86px rgba(31, 34, 45, .32);
+      background:
+        radial-gradient(circle at 18% 10%, rgba(255, 255, 255, .82), transparent 24%),
+        radial-gradient(circle at 74% 8%, rgba(80, 223, 217, .45), transparent 30%),
+        radial-gradient(circle at 86% 78%, rgba(133, 82, 255, .36), transparent 28%),
+        radial-gradient(circle at 22% 78%, rgba(255, 186, 129, .45), transparent 34%),
+        linear-gradient(135deg, #efe2d0 0%, #d6d8d8 42%, #6e8190 100%);
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      width: min(760px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 32px 0 30px;
+    }
+
+    .top {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .title-kicker {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 850;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.15rem, 9vw, 5rem);
+      line-height: .96;
+      letter-spacing: 0;
+      font-weight: 950;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      min-height: 36px;
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--control-radius);
+      background: rgba(255, 255, 255, .62);
+      color: currentColor;
+      font-size: .76rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      white-space: nowrap;
+      backdrop-filter: blur(16px);
+    }
+
+    body.theme-gold .tag {
+      color: #f9e8b3;
+      background: rgba(20, 16, 10, .52);
+      border-color: rgba(216, 170, 69, .52);
+    }
+
+    body.theme-glass .tag {
+      border-color: rgba(255, 255, 255, .70);
+      background: rgba(255, 255, 255, .28);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .75), 0 12px 34px rgba(40, 42, 56, .12);
+    }
+
+    .theme-area {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .theme-switch {
+      display: grid;
+      gap: 6px;
+      padding: 5px;
+      border: 1px solid var(--line);
+      border-radius: var(--control-radius);
+      background: rgba(255, 255, 255, .62);
+      backdrop-filter: blur(16px);
+    }
+
+    .theme-switch.primary {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .theme-switch.secondary {
+      grid-template-columns: 1fr;
+      opacity: .86;
+    }
+
+    body.theme-glass .theme-switch {
+      background: rgba(255, 255, 255, .22);
+      border-color: rgba(255, 255, 255, .62);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .72), 0 18px 44px rgba(31, 34, 45, .16);
+      backdrop-filter: blur(22px) saturate(1.45);
+    }
+
+    .theme-switch button {
+      min-height: 42px;
+      border: 0;
+      border-radius: calc(var(--control-radius) - 1px);
+      background: transparent;
+      color: inherit;
+      font-size: .85rem;
+      font-weight: 950;
+      letter-spacing: .08em;
+    }
+
+    body.theme-glass .theme-switch button {
+      border-radius: 999px;
+    }
+
+    .theme-switch button.active {
+      background: var(--main);
+      color: #fff;
+    }
+
+    body.theme-gold .theme-switch button.active {
+      background: linear-gradient(135deg, #fff1b8, #c78b25 48%, #6f4b12);
+      color: #1a1208;
+      box-shadow: 0 14px 30px rgba(216, 170, 69, .26);
+    }
+
+    body.theme-glass .theme-switch button.active {
+      background: linear-gradient(135deg, rgba(127, 88, 255, .86), rgba(95, 235, 218, .72));
+      color: #fff;
+      box-shadow: 0 12px 28px rgba(93, 78, 210, .28), inset 0 1px 0 rgba(255, 255, 255, .58);
+    }
+
+    .card {
+      position: relative;
+      overflow: hidden;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    body.theme-glass .card {
+      border-color: rgba(255, 255, 255, .62);
+      background: linear-gradient(135deg, rgba(255, 255, 255, .46), rgba(255, 255, 255, .20)), rgba(255, 255, 255, .18);
+      box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, .78);
+      backdrop-filter: blur(26px) saturate(1.55);
+    }
+
+    body.theme-gold .card {
+      border-color: rgba(216, 170, 69, .40);
+      background:
+        linear-gradient(135deg, rgba(255, 248, 224, .96), rgba(255, 255, 255, .84)),
+        var(--panel);
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 112px;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .main-input,
+    .unit-label,
+    .units,
+    .result,
+    .estimate {
+      border: 1px solid var(--line);
+      border-radius: var(--control-radius);
+      background: rgba(255, 255, 255, .88);
+    }
+
+    body.theme-glass .main-input,
+    body.theme-glass .unit-label,
+    body.theme-glass .units,
+    body.theme-glass .result,
+    body.theme-glass .estimate {
+      border: 1px solid rgba(255, 255, 255, .64);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, .30);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, .74), 0 16px 36px rgba(31, 34, 45, .13);
+      backdrop-filter: blur(20px) saturate(1.35);
+    }
+
+    .main-input {
+      width: 100%;
+      min-height: 92px;
+      padding: 8px 18px;
+      color: var(--ink);
+      font-size: clamp(3rem, 13vw, 6rem);
+      font-weight: 950;
+      text-align: right;
+      letter-spacing: 0;
+      outline: none;
+    }
+
+    .main-input:focus,
+    .price-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 5px rgba(183, 155, 98, .16);
+    }
+
+    .unit-label {
+      display: grid;
+      place-items: center;
+      min-height: 92px;
+      background: var(--main);
+      color: #fff;
+      font-size: 1.6rem;
+      font-weight: 950;
+    }
+
+    body.theme-gold .unit-label,
+    body.theme-gold .clear {
+      background: linear-gradient(135deg, #fff1b8, #c78b25 46%, #6f4b12);
+      color: #1a1208;
+    }
+
+    body.theme-glass .unit-label,
+    body.theme-glass .clear {
+      background: linear-gradient(135deg, rgba(120, 78, 255, .86), rgba(92, 229, 215, .76));
+      color: #fff;
+    }
+
+    .units {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+      padding: 5px;
+      border-radius: 999px;
+    }
+
+    body.theme-luxe .units {
+      border-radius: 3px;
+    }
+
+    .units button,
+    .clear {
+      min-height: 50px;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--ink);
+      font-weight: 950;
+    }
+
+    body.theme-luxe .units button,
+    body.theme-luxe .clear {
+      border-radius: 2px;
+    }
+
+    .units button.active {
+      background: var(--main);
+      color: #fff;
+    }
+
+    body.theme-gold .units button.active {
+      background: linear-gradient(135deg, #fff1b8, #c78b25 50%, #6f4b12);
+      color: #1a1208;
+    }
+
+    body.theme-glass .units button.active {
+      background: linear-gradient(135deg, rgba(111, 77, 245, .90), rgba(89, 230, 217, .72));
+      color: #fff;
+    }
+
+    .results {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .result {
+      display: grid;
+      grid-template-columns: 92px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      min-height: 98px;
+      padding: 14px 16px;
+    }
+
+    .result.current {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    body.theme-glass .result.current {
+      background: linear-gradient(135deg, rgba(255, 195, 212, .52), rgba(94, 234, 221, .45), rgba(132, 87, 255, .34));
+    }
+
+    .name {
+      color: var(--muted);
+      font-size: .92rem;
+      font-weight: 950;
+      letter-spacing: .04em;
+    }
+
+    .value {
+      text-align: right;
+      font-size: clamp(2.35rem, 8vw, 4.6rem);
+      font-weight: 950;
+      line-height: 1;
+      overflow-wrap: anywhere;
+    }
+
+    .estimate {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+      padding: 14px;
+    }
+
+    .estimate-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .estimate-title {
+      margin: 0;
+      font-size: .95rem;
+      font-weight: 950;
+    }
+
+    .estimate-badge {
+      color: var(--muted);
+      font-size: .76rem;
+      font-weight: 850;
+      letter-spacing: .08em;
+    }
+
+    .price-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 132px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .price-input {
+      width: 100%;
+      min-height: 50px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--control-radius);
+      background: rgba(255, 255, 255, .88);
+      color: var(--ink);
+      font-size: 1.4rem;
+      font-weight: 900;
+      text-align: right;
+      outline: none;
+    }
+
+    body.theme-glass .price-input {
+      border-color: rgba(255, 255, 255, .64);
+      background: rgba(255, 255, 255, .32);
+      border-radius: 18px;
+      backdrop-filter: blur(18px);
+    }
+
+    .price-unit {
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .estimate-total {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: baseline;
+      padding-top: 10px;
+      border-top: 1px solid var(--line);
+    }
+
+    .estimate-total strong {
+      font-size: clamp(2rem, 7vw, 4rem);
+      font-weight: 950;
+      line-height: 1;
+      text-align: right;
+    }
+
+    .clear {
+      width: 100%;
+      margin-top: 14px;
+      background: var(--main);
+      color: #fff;
+    }
+
+    .note {
+      margin: 16px 4px 0;
+      color: var(--muted);
+      font-size: .84rem;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 520px) {
+      .app {
+        width: min(100% - 16px, 760px);
+        padding-top: 14px;
+      }
+
+      .top {
+        display: grid;
+        gap: 8px;
+      }
+
+      .card {
+        padding: 14px;
+      }
+
+      .input-row,
+      .price-row {
+        grid-template-columns: 1fr;
+      }
+
+      .unit-label {
+        min-height: 52px;
+      }
+
+      .result {
+        grid-template-columns: 1fr;
+        gap: 4px;
+        min-height: 92px;
+      }
+    }
+  </style>
+</head>
+<body class="theme-luxe">
+  <main class="app">
+    <div class="top">
+      <div>
+        <p class="title-kicker">AREA CONVERTER</p>
+        <h1>Madori</h1>
+      </div>
+      <div class="tag">TSUBO / M2 / TATAMI</div>
+    </div>
+
+    <div class="theme-area" aria-label="デザイン選択">
+      <div class="theme-switch primary">
+        <button type="button" class="active" data-theme="luxe">LUXE</button>
+        <button type="button" data-theme="gold">GOLD</button>
+      </div>
+      <div class="theme-switch secondary">
+        <button type="button" data-theme="glass">GLASS</button>
+      </div>
+    </div>
+
+    <section class="card" aria-label="単位換算電卓">
+      <div class="input-row">
+        <input id="amount" class="main-input" inputmode="decimal" autocomplete="off" value="10" aria-label="数値">
+        <div id="activeUnitLabel" class="unit-label">坪</div>
+      </div>
+
+      <div class="units" aria-label="入力する単位">
+        <button type="button" class="active" data-unit="tsubo">坪</button>
+        <button type="button" data-unit="sqm">平米</button>
+        <button type="button" data-unit="jo">畳</button>
+      </div>
+
+      <div class="results">
+        <div id="rowTsubo" class="result current">
+          <div class="name">坪</div>
+          <div id="outTsubo" class="value">10</div>
+        </div>
+        <div id="rowSqm" class="result">
+          <div class="name">平米</div>
+          <div id="outSqm" class="value">33.06</div>
+        </div>
+        <div id="rowJo" class="result">
+          <div class="name">畳</div>
+          <div id="outJo" class="value">19.96</div>
+        </div>
+      </div>
+
+      <section class="estimate" aria-label="左官金額計算">
+        <div class="estimate-header">
+          <h2 class="estimate-title">左官 平米単価</h2>
+          <div id="estimateArea" class="estimate-badge">33.06平米</div>
+        </div>
+        <div class="price-row">
+          <input id="unitPrice" class="price-input" inputmode="decimal" autocomplete="off" value="0" aria-label="左官の平米単価">
+          <div class="price-unit">円 / 平米</div>
+        </div>
+        <div class="estimate-total">
+          <span class="name">合計</span>
+          <strong id="outCost">0円</strong>
+        </div>
+      </section>
+
+      <button type="button" id="clear" class="clear">クリア</button>
+
+      <p class="note">基準: 1坪 = 3.305785平米、1畳 = 1.6562平米。左官金額は「現在の平米数 × 平米単価」で概算します。</p>
+    </section>
+  </main>
+
+  <script>
+    const TSUBO_TO_SQM = 3.305785;
+    const JO_TO_SQM = 1.6562;
+    const labels = {
+      tsubo: "坪",
+      sqm: "平米",
+      jo: "畳"
+    };
+    const amount = document.querySelector("#amount");
+    const unitPrice = document.querySelector("#unitPrice");
+    const unitLabel = document.querySelector("#activeUnitLabel");
+    const unitButtons = Array.from(document.querySelectorAll("[data-unit]"));
+    const themeButtons = Array.from(document.querySelectorAll("[data-theme]"));
+    const estimateArea = document.querySelector("#estimateArea");
+    const outCost = document.querySelector("#outCost");
+    const rows = {
+      tsubo: document.querySelector("#rowTsubo"),
+      sqm: document.querySelector("#rowSqm"),
+      jo: document.querySelector("#rowJo")
+    };
+    const outputs = {
+      tsubo: document.querySelector("#outTsubo"),
+      sqm: document.querySelector("#outSqm"),
+      jo: document.querySelector("#outJo")
+    };
+    let activeUnit = "tsubo";
+    let activeTheme = loadTheme();
+
+    function readNumber(value) {
+      const normalized = String(value).replace(/,/g, "").trim();
+      const parsed = Number(normalized);
+      return Number.isFinite(parsed) ? parsed : 0;
+    }
+
+    function format(value) {
+      return new Intl.NumberFormat("ja-JP", {
+        maximumFractionDigits: 2
+      }).format(value);
+    }
+
+    function yen(value) {
+      return new Intl.NumberFormat("ja-JP", {
+        style: "currency",
+        currency: "JPY",
+        maximumFractionDigits: 0
+      }).format(Number.isFinite(value) ? value : 0);
+    }
+
+    function toSqm(value) {
+      if (activeUnit === "tsubo") return value * TSUBO_TO_SQM;
+      if (activeUnit === "jo") return value * JO_TO_SQM;
+      return value;
+    }
+
+    function loadTheme() {
+      try {
+        return localStorage.getItem("madoriTheme") || "luxe";
+      } catch {
+        return "luxe";
+      }
+    }
+
+    function saveTheme(theme) {
+      try {
+        localStorage.setItem("madoriTheme", theme);
+      } catch {
+        // Direct file access can block storage; theme switching should still work.
+      }
+    }
+
+    function calculate() {
+      const value = readNumber(amount.value);
+      const sqm = toSqm(value);
+      const tsubo = sqm / TSUBO_TO_SQM;
+      const jo = sqm / JO_TO_SQM;
+      const cost = sqm * readNumber(unitPrice.value);
+
+      outputs.tsubo.textContent = format(tsubo);
+      outputs.sqm.textContent = format(sqm);
+      outputs.jo.textContent = format(jo);
+      estimateArea.textContent = `${format(sqm)}平米`;
+      outCost.textContent = yen(cost);
+
+      unitLabel.textContent = labels[activeUnit];
+      unitButtons.forEach(button => {
+        button.classList.toggle("active", button.dataset.unit === activeUnit);
+      });
+      Object.entries(rows).forEach(([unit, row]) => {
+        row.classList.toggle("current", unit === activeUnit);
+      });
+    }
+
+    function applyTheme(theme) {
+      activeTheme = ["luxe", "gold", "glass"].includes(theme) ? theme : "luxe";
+      document.body.className = `theme-${activeTheme}`;
+      themeButtons.forEach(button => {
+        button.classList.toggle("active", button.dataset.theme === activeTheme);
+      });
+      saveTheme(activeTheme);
+    }
+
+    amount.addEventListener("input", calculate);
+    unitPrice.addEventListener("input", calculate);
+    unitButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        activeUnit = button.dataset.unit;
+        calculate();
+        amount.focus();
+      });
+    });
+    document.querySelector("#clear").addEventListener("click", () => {
+      amount.value = "";
+      unitPrice.value = "";
+      calculate();
+      amount.focus();
+    });
+    themeButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        applyTheme(button.dataset.theme);
+      });
+    });
+
+    applyTheme(activeTheme);
+    calculate();
+  </script>
+</body>
+</html>
