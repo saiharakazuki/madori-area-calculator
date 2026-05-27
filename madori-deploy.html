@@ -63,6 +63,23 @@
               <h2>左官塗装 見積もり</h2>
             </div>
 
+            <section class="project-panel" aria-label="案件保存">
+              <label class="wide-field">
+                案件名
+                <input id="projectName" type="text" placeholder="例: ○○様 リビング" autocomplete="off" />
+              </label>
+              <div class="project-actions">
+                <button id="saveProject" type="button">保存</button>
+                <button id="newProject" type="button">新規</button>
+              </div>
+              <div class="saved-project-row">
+                <select id="savedProjects" aria-label="保存案件"></select>
+                <button id="loadProject" type="button">呼出</button>
+                <button id="deleteProject" type="button">削除</button>
+              </div>
+              <p id="projectStatus" class="project-status" aria-live="polite"></p>
+            </section>
+
             <div class="estimate-fields">
               <label class="wide-field">
                 施工平米
@@ -89,8 +106,13 @@
               </label>
             </div>
 
+            <div class="tax-switch" aria-label="合計表示">
+              <button class="active" data-tax-mode="ex" type="button">税抜</button>
+              <button data-tax-mode="in" type="button">税込</button>
+            </div>
+
             <div class="total-box">
-              <span>施工金額</span>
+              <span id="grandTotalLabel">施工金額 税抜</span>
               <strong id="grandTotal">¥0</strong>
             </div>
 
@@ -104,7 +126,7 @@
                 <strong id="designCost">¥0</strong>
               </article>
               <article>
-                <span>税込目安</span>
+                <span id="taxCompareLabel">税込合計</span>
                 <strong id="taxTotal">¥0</strong>
               </article>
               <article>

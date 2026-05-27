@@ -26,7 +26,8 @@ body {
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -141,7 +142,8 @@ h2 {
   margin-bottom: 16px;
 }
 
-input {
+input,
+select {
   width: 100%;
   min-width: 0;
   border: 2px solid var(--line);
@@ -153,7 +155,8 @@ input {
   font-weight: 950;
 }
 
-input:focus {
+input:focus,
+select:focus {
   box-shadow: 0 0 0 4px rgba(21, 19, 36, 0.1);
 }
 
@@ -231,6 +234,63 @@ label,
   gap: 18px;
 }
 
+.project-panel {
+  display: grid;
+  gap: 10px;
+  border: 2px solid #dedbd4;
+  border-radius: 18px;
+  background: #faf8f3;
+  padding: 14px;
+}
+
+#projectName,
+#savedProjects {
+  height: 54px;
+  background: #fff;
+  font-size: 1rem;
+}
+
+.project-actions,
+.saved-project-row,
+.tax-switch {
+  display: grid;
+  gap: 10px;
+}
+
+.project-actions {
+  grid-template-columns: 1fr 1fr;
+}
+
+.saved-project-row {
+  grid-template-columns: minmax(0, 1fr) 92px 92px;
+}
+
+.project-actions button,
+.saved-project-row button,
+.tax-switch button {
+  min-height: 50px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  font-weight: 950;
+}
+
+.project-actions button:first-child,
+.tax-switch button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.project-status {
+  min-height: 1.3em;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
 .section-heading .eyebrow {
   color: var(--green);
 }
@@ -266,6 +326,18 @@ label {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
+}
+
+.tax-switch {
+  grid-template-columns: 1fr 1fr;
+  border: 2px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  padding: 6px;
+}
+
+.tax-switch button {
+  border: 0;
 }
 
 .toggle-line {
@@ -351,6 +423,8 @@ label {
   .input-stage,
   .estimate-fields,
   .toggle-row,
+  .project-actions,
+  .saved-project-row,
   .breakdown-grid {
     grid-template-columns: 1fr;
   }
